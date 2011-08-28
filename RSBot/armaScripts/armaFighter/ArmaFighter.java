@@ -628,6 +628,16 @@ public class ArmaFighter extends Script implements PaintListener, MessageListene
 			return null;
 		return new RSArea(swXmin - 3, swYmin - 3, neXmax + 3, neYmax + 3);
 	}
+	
+	private boolean canAttack(RSNPC npc){
+		for(String action : npc.getActions()){
+			if(action == null)
+				continue;
+			if(action.equals("Attack"))
+				return true;
+		}
+		return false;
+	}
 
 	private boolean loadSettings(){
 
@@ -666,6 +676,7 @@ public class ArmaFighter extends Script implements PaintListener, MessageListene
 		healthLowAt = (Integer) healthLowSpinner.getValue();
 		usePercentages = percent.isSelected();
 		amountOfFood = (Integer) amountOfFoodSpinner.getValue();
+		bankArea = new RSArea(-1, -1, 1, 1); //TODO FIXME
 		log("Succussfully set settings");
 		return true;
 	}
@@ -736,15 +747,8 @@ public class ArmaFighter extends Script implements PaintListener, MessageListene
 		case FIGHTING_NONTARGET_NPC:
 			final RSCharacter t = getMyPlayer().getInteracting();
 			if(t instanceof RSNPC){
-				final RSNPC npc = (RSNPC) t;
-				final int npcId = npc.getID();
-				for(int id : targetIds){
-					if(npcId == id){
-						target = npc;
-						inCombat = true;
-						return 500;
-					}
-				}
+				if(!canAttack((RSNPC)t))
+					break;
 			}
 			if(targetArea.contains(getMyPlayer().getLocation())){
 				return loop(State.WALKING_BANK_AREA);
